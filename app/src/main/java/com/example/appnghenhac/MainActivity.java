@@ -16,14 +16,19 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView txtTile, txtTimeSong, txtTimeTotal;
     SeekBar skSong;
     ImageView imgHinh;
-    ImageButton btnPrev, btnPlay, btnStop, btnNext;
+    ImageView btnPrev, btnPlay, btnStop, btnNext, btnRandom, btnRepeat;
     MediaPlayer mediaPlayer;
+    Boolean repeatFlag = true;
+
+    Boolean shuffle = false;
+    Random random;
 
     ArrayList<Song> arraySong;
     int position = 0;
@@ -38,8 +43,35 @@ public class MainActivity extends AppCompatActivity {
         AddSong();
 
         khoiTaoMediaPlayer();
+        random = new Random();
+
 
         animation = AnimationUtils.loadAnimation(this, R.anim.disc_rotate);
+
+        btnRandom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (shuffle){
+                    btnRandom.setImageResource(R.drawable.ic_action_random);
+                }else{
+                    btnRandom.setImageResource(R.drawable.ic_action_random_on);
+                }
+                shuffle = !shuffle;
+            }
+        });
+
+        btnRepeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(repeatFlag){
+                    btnRepeat.setImageResource(R.drawable.ic_action_repeatone);
+                }else{
+                    btnRepeat.setImageResource(R.drawable.ic_action_repeat);
+                }
+                repeatFlag = !repeatFlag;
+
+            }
+        });
 
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,11 +83,27 @@ public class MainActivity extends AppCompatActivity {
                 if(mediaPlayer.isPlaying()){
                     mediaPlayer.stop();
                 }
-                khoiTaoMediaPlayer();
-                mediaPlayer.start();
-                btnPlay.setImageResource(R.drawable.ic_action_pause);
-                setTimeTotal();
-                updateTimeSong();
+                if(!shuffle){
+                    khoiTaoMediaPlayer();
+                    mediaPlayer.start();
+                    btnPlay.setImageResource(R.drawable.ic_action_pause);
+                    setTimeTotal();
+                    updateTimeSong();
+
+                }else{
+                    int newSong =  position;
+//                    while (newSong == position){
+                        newSong = random.nextInt(arraySong.size());
+//                    }
+                    position = newSong;
+                    khoiTaoMediaPlayer();
+                    mediaPlayer.start();
+                    btnPlay.setImageResource(R.drawable.ic_action_pause);
+                    setTimeTotal();
+                    updateTimeSong();
+                }
+
+
             }
         });
 
@@ -132,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 // update progress sksong
                 skSong.setProgress(mediaPlayer.getCurrentPosition());
 
-                // kiểm tra thời gian bài hát => nếu kết thúc next
+                // kiểm tra thời gian bài hát => nếu kết thúc => next
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
@@ -143,11 +191,19 @@ public class MainActivity extends AppCompatActivity {
                         if(mediaPlayer.isPlaying()){
                             mediaPlayer.stop();
                         }
-                        khoiTaoMediaPlayer();
-                        mediaPlayer.start();
-                        btnPlay.setImageResource(R.drawable.ic_action_pause);
-                        setTimeTotal();
-                        updateTimeSong();
+                        if(repeatFlag){
+                            khoiTaoMediaPlayer();
+                            mediaPlayer.start();
+                            btnPlay.setImageResource(R.drawable.ic_action_pause);
+                            setTimeTotal();
+                            updateTimeSong();
+                        }else{
+                            mediaPlayer.start();
+                            btnPlay.setImageResource(R.drawable.ic_action_pause);
+                            setTimeTotal();
+                            updateTimeSong();
+                        }
+
                     }
                 });
                 handler.postDelayed(this, 500);
@@ -172,6 +228,10 @@ public class MainActivity extends AppCompatActivity {
         arraySong = new ArrayList<>();
         arraySong.add(new Song("thuong em", R.raw.song1));
         arraySong.add(new Song("I do", R.raw.song2));
+        arraySong.add(new Song("I do1", R.raw.song2));
+        arraySong.add(new Song("I do2", R.raw.song2));
+        arraySong.add(new Song("I do3", R.raw.song2));
+
     }
 
     private void AnhXa(){
@@ -179,10 +239,12 @@ public class MainActivity extends AppCompatActivity {
         txtTimeTotal = (TextView) findViewById(R.id.textviewTimeTotal);
         txtTile = (TextView) findViewById(R.id.textviewTile);
         skSong = (SeekBar) findViewById(R.id.seekBarSong);
-        btnNext = (ImageButton) findViewById(R.id.imageButtonNext);
-        btnPlay = (ImageButton) findViewById(R.id.imageButtonPlay);
-        btnStop = (ImageButton) findViewById(R.id.imageButtonStop);
-        btnPrev = (ImageButton) findViewById(R.id.imageButtonPrev);
-        imgHinh = (ImageView) findViewById(R.id.imageViewDisc);
+        btnNext = (ImageView) findViewById(R.id.imageViewNext);
+        btnPlay = (ImageView) findViewById(R.id.imageViewPlay);
+        btnStop = (ImageView) findViewById(R.id.imageViewStop);
+        btnPrev = (ImageView) findViewById(R.id.imageViewPrevious);
+        btnRandom = (ImageView) findViewById(R.id.imageViewRandom);
+        btnRepeat = (ImageView) findViewById(R.id.imageViewRepeat);
+        imgHinh = (ImageView) findViewById(R.id.imageViewhing);
     }
 }
